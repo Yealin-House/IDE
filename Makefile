@@ -12,15 +12,19 @@ build:
 	echo "Built target/release/IDE.app ($$IDE_VERSION)"
 
 # Full release: bumps the version, persists it to VERSION, builds, then
-# produces the release artifacts in dist/ — a .dmg, its .sha256 file, and an
-# updated CHANGELOG.md. Upload the .dmg and .sha256 to the GitHub release at
+# produces the release artifacts in dist/ — a .dmg (with the license files
+# shipped alongside the app), its .sha256 file, and an updated CHANGELOG.md.
+# Upload the .dmg and .sha256 to the GitHub release at
 # https://github.com/Yealin-House/IDE, then commit VERSION and CHANGELOG.md.
 release:
 	@IDE_VERSION=$$($(BUMP) release); export IDE_VERSION; \
 	cargo build --release --bin ide && \
-	mkdir -p dist && \
-	test -d target/release/IDE.app && \
-	hdiutil create -volname $(APP_NAME) -srcfolder target/release/IDE.app -ov -format UDZO "$(DMG)" && \
+	mkdir -p dist/staging && \
+	rm -rf dist/staging/* && \
+	cp -R target/release/IDE.app dist/staging/ && \
+	cp LICENSE-GPL LICENSE-APACHE dist/staging/ && \
+	cp partial/LICENSE dist/staging/LICENSE-partial && \
+	hdiutil create -volname $(APP_NAME) -srcfolder dist/staging -ov -format UDZO "$(DMG)" && \
 	shasum -a 256 "$(DMG)" > "$(DMG).sha256" && \
 	$(BUMP) changelog "$$IDE_VERSION" && \
 	echo "Release $$IDE_VERSION ready:" && \

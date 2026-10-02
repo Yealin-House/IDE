@@ -15,11 +15,12 @@ IDE is an open-source code editor engineered for developers who prioritize perfo
 - Privacy-First and Zero Telemetry: All analytics, usage tracking, and remote telemetry pings are disabled.
 - Account-Free Operation: All editor functionality is unlocked locally without mandatory logins, cloud accounts, or walled-garden requirements.
 - Bring Your Own Key (BYOK) AI: Connect directly to your choice of language model providers using your own API keys:
-  - Anthropic (Claude 3.5 Sonnet, Claude 3 Opus)
-  - OpenAI (GPT-4o, o1, etc.)
-  - Google AI (Gemini 1.5 Pro, Flash)
+  - Anthropic (Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 4.5)
+  - OpenAI (GPT-6 and GPT-5.6 series)
+  - Google AI (Gemini Pro and Flash models)
   - Local LLMs via Ollama and LM Studio
   - OpenRouter, DeepSeek, Mistral, and AWS Bedrock
+  - Model availability depends on your provider. You can configure any model ID your provider supports.
 - Integrated Browser Tab: Inspect local development servers (such as `http://localhost:3000` or `http://localhost:5173`) directly inside the editor pane. Open it with `alt-b`, `cmd-alt-b`, or `cmd-k b`, or via File → New Browser Tab.
 - Clean Local Configuration: Application settings and caches are isolated to `~/.ide/` (macOS) or `~/.config/ide/` (Linux).
 
@@ -73,9 +74,12 @@ export GOOGLE_AI_API_KEY="your-gemini-key"
 ### Compilation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Yealin-House/ide.git
-cd ide
+# Clone the repository (with the partial/ submodule — required to build)
+git clone --recurse-submodules https://github.com/Yealin-House/IDE.git
+cd IDE
+
+# If you already cloned without the flag:
+# git submodule update --init --recursive
 
 # Build release binary
 cargo build --release --bin ide
@@ -99,6 +103,8 @@ The integrated browser tab and the application branding assets live in the [`par
 ### Upstream Attribution
 
 This software is derived from the Zed open-source project, originally created and published by Zed Industries, Inc. We acknowledge and appreciate the contributions of the original authors and the open-source community.
+
+**Notice of modification (GPL-3.0 5a):** This distribution is a modified version of Zed, modified by Jaseunda starting 2026-10-03 (rebranding, telemetry removal, cloud sign-in removal, and the addition of an embedded browser tab). Every binary release on this repository corresponds to a tagged commit in this repo plus the `partial/` submodule source at [github.com/Jaseunda/ide](https://github.com/Jaseunda/ide) (tag archives do not include submodule contents, so the complete source for a release is this repo's tag **plus** the pinned `partial/` commit).
 
 ### Trademark Notice
 
