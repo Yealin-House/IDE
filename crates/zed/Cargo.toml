@@ -6,7 +6,7 @@ version = "1.24.0"
 publish.workspace = true
 license = "GPL-3.0-or-later"
 authors = ["Zed Team <hi@zed.dev>"]
-default-run = "zed"
+default-run = "ide"
 
 [lints]
 workspace = true
@@ -54,7 +54,7 @@ visual-tests = [
 ]
 
 [[bin]]
-name = "zed"
+name = "ide"
 path = "src/main.rs"
 
 [[bin]]
@@ -235,6 +235,9 @@ zlog.workspace = true
 zlog_settings.workspace = true
 ztracing.workspace = true
 
+[target.'cfg(target_os = "macos")'.dependencies]
+libc.workspace = true
+
 [target.'cfg(target_os = "windows")'.dependencies]
 etw_tracing.workspace = true
 windows.workspace = true
@@ -279,33 +282,33 @@ repl = { workspace = true, features = ["test-support"] }
 
 
 [package.metadata.bundle-dev]
-icon = ["resources/app-icon-dev@2x.png", "resources/app-icon-dev.png"]
-identifier = "dev.zed.Zed-Dev"
-name = "Zed Dev"
+icon = ["resources/app_icon.icns", "resources/app-icon-dev@2x.png", "resources/app-icon-dev.png"]
+identifier = "com.notapublicfigureanymore.ide.Dev"
+name = "IDE Dev"
 osx_minimum_system_version = "10.15.7"
 osx_info_plist_exts = ["resources/info/*"]
 osx_url_schemes = ["zed"]
 
 [package.metadata.bundle-nightly]
-icon = ["resources/app-icon-nightly@2x.png", "resources/app-icon-nightly.png"]
-identifier = "dev.zed.Zed-Nightly"
-name = "Zed Nightly"
+icon = ["resources/app_icon.icns", "resources/app-icon-nightly@2x.png", "resources/app-icon-nightly.png"]
+identifier = "com.notapublicfigureanymore.ide.Nightly"
+name = "IDE Nightly"
 osx_minimum_system_version = "10.15.7"
 osx_info_plist_exts = ["resources/info/*"]
 osx_url_schemes = ["zed"]
 
 [package.metadata.bundle-preview]
-icon = ["resources/app-icon-preview@2x.png", "resources/app-icon-preview.png"]
-identifier = "dev.zed.Zed-Preview"
-name = "Zed Preview"
+icon = ["resources/app_icon.icns", "resources/app-icon-preview@2x.png", "resources/app-icon-preview.png"]
+identifier = "com.notapublicfigureanymore.ide.Preview"
+name = "IDE Preview"
 osx_minimum_system_version = "10.15.7"
 osx_info_plist_exts = ["resources/info/*"]
 osx_url_schemes = ["zed"]
 
 [package.metadata.bundle-stable]
-icon = ["resources/app-icon@2x.png", "resources/app-icon.png"]
-identifier = "dev.zed.Zed"
-name = "Zed"
+icon = ["resources/app_icon.icns", "resources/app-icon@2x.png", "resources/app-icon.png"]
+identifier = "com.notapublicfigureanymore.ide"
+name = "IDE"
 osx_minimum_system_version = "10.15.7"
 osx_info_plist_exts = ["resources/info/*"]
 osx_url_schemes = ["zed"]

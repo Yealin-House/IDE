@@ -6237,30 +6237,8 @@ impl AgentPanel {
             .child(toolbar_content)
     }
 
-    fn should_render_trial_end_upsell(&self, cx: &mut Context<Self>) -> bool {
-        if TrialEndUpsell::dismissed(cx) {
-            return false;
-        }
-
-        match &self.base_view {
-            BaseView::AgentThread { .. } => {
-                if LanguageModelRegistry::global(cx)
-                    .read(cx)
-                    .default_model()
-                    .is_some_and(|model| model.provider_id != language_model::ZED_CLOUD_PROVIDER_ID)
-                {
-                    return false;
-                }
-            }
-            BaseView::Terminal { .. } | BaseView::Uninitialized => {
-                return false;
-            }
-        }
-
-        let plan = self.user_store.read(cx).plan();
-        let has_previous_trial = self.user_store.read(cx).trial_started_at().is_some();
-
-        plan.is_some_and(|plan| plan == Plan::ZedFree) && has_previous_trial
+    fn should_render_trial_end_upsell(&self, _cx: &mut Context<Self>) -> bool {
+        false
     }
 
     fn dismiss_ai_onboarding(&mut self, cx: &mut Context<Self>) {
@@ -6335,30 +6313,9 @@ impl AgentPanel {
     fn render_trial_end_upsell(
         &self,
         _window: &mut Window,
-        cx: &mut Context<Self>,
-    ) -> Option<impl IntoElement> {
-        if !self.should_render_trial_end_upsell(cx) {
-            return None;
-        }
-
-        Some(
-            v_flex()
-                .absolute()
-                .inset_0()
-                .size_full()
-                .bg(cx.theme().colors().panel_background)
-                .opacity(0.85)
-                .block_mouse_except_scroll()
-                .child(EndTrialUpsell::new(Arc::new({
-                    let this = cx.entity();
-                    move |_, cx| {
-                        this.update(cx, |_this, cx| {
-                            TrialEndUpsell::set_dismissed(true, cx);
-                            cx.notify();
-                        });
-                    }
-                }))),
-        )
+        _cx: &mut Context<Self>,
+    ) -> Option<gpui::AnyElement> {
+        None
     }
 
     fn render_drag_target(&self, cx: &Context<Self>) -> Div {

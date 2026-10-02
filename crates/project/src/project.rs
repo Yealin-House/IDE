@@ -1145,7 +1145,7 @@ pub enum PulledDiagnostics {
     },
 }
 
-/// Whether to disable all AI features in Zed.
+/// Whether to disable all AI features in IDE.
 ///
 /// Default: false
 #[derive(Copy, Clone, Debug, RegisterSetting)]

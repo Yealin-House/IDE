@@ -45,7 +45,7 @@ pub struct WorkspaceSettingsContent {
     ///
     /// Default: off
     pub autosave: Option<AutosaveSetting>,
-    /// Controls previous session restoration in freshly launched Zed instance.
+    /// Controls previous session restoration in freshly launched IDE instance.
     /// Values: empty_tab, last_workspace, last_session, launchpad
     /// Default: last_session
     pub restore_on_startup: Option<RestoreOnStartupBehavior>,
@@ -81,19 +81,19 @@ pub struct WorkspaceSettingsContent {
     ///
     /// Default: auto ("on" on macOS, "off" otherwise)
     pub when_closing_with_no_tabs: Option<CloseWindowWhenNoItems>,
-    /// Whether to optimize Zed's interface for assistive technology such as
+    /// Whether to optimize the interface for assistive technology such as
     /// screen readers.
     ///
     /// Default: false
     pub accessible_mode: Option<bool>,
     /// Whether to use the system provided dialogs for Open and Save As.
-    /// When set to false, Zed will use the built-in keyboard-first pickers.
+    /// When set to false, IDE will use the built-in keyboard-first pickers.
     ///
     /// Default: true
     pub use_system_path_prompts: Option<bool>,
     /// Whether to use the system provided prompts.
-    /// When set to false, Zed will use the built-in prompts.
-    /// Note that this setting has no effect on Linux, where Zed will always
+    /// When set to false, IDE will use the built-in prompts.
+    /// Note that this setting has no effect on Linux, where IDE will always
     /// use the built-in prompts.
     ///
     /// Default: true
@@ -165,7 +165,7 @@ pub struct WorkspaceSettingsContent {
     ///
     /// Default: ` — `
     pub window_title_separator: Option<String>,
-    /// Controls whether Zed or the window manager or compositor draws window decorations on Linux.
+    /// Controls whether IDE or the window manager or compositor draws window decorations on Linux.
     ///
     /// Default: client
     pub window_decorations: Option<WindowDecorations>,
@@ -411,7 +411,7 @@ pub enum FullscreenMode {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum WindowDecorations {
-    /// Zed draws its own window decorations/titlebar (client-side decoration).
+    /// IDE draws its own window decorations/titlebar (client-side decoration).
     #[default]
     Client,
     /// The window manager or compositor draws the server-side window
@@ -469,7 +469,7 @@ impl CloseWindowWhenNoItems {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum CliDefaultOpenBehavior {
-    /// Open directories as a new workspace in the current Zed window's sidebar.
+    /// Open directories as a new workspace in the current IDE window's sidebar.
     #[default]
     #[strum(serialize = "Add to Existing Window")]
     ExistingWindow,

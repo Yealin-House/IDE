@@ -1,4 +1,6 @@
 pub mod active_file_name;
+#[path = "../../../partial/src/browser.rs"]
+pub mod browser;
 pub mod dock;
 pub mod history_manager;
 pub mod invalid_item_view;
@@ -992,6 +994,7 @@ pub fn prompt_for_open_path_and_open(
 pub fn init(app_state: Arc<AppState>, cx: &mut App) {
     component::init();
     theme_preview::init(cx);
+    browser::init(cx);
     toast_layer::init(cx);
     history_manager::init(app_state.fs.clone(), cx);
 
@@ -8080,6 +8083,9 @@ impl Workspace {
             .on_action(cx.listener(Self::reopen_last_picker))
             .on_action(cx.listener(Self::toggle_edit_predictions_all_files))
             .on_action(cx.listener(Self::toggle_theme_mode))
+            .on_action(cx.listener(|workspace, _: &zed_actions::OpenBrowserTab, window, cx| {
+                browser::open_browser_tab(workspace, window, cx);
+            }))
             .on_action(cx.listener(|workspace, _: &Unfollow, window, cx| {
                 let pane = workspace.active_pane().clone();
                 workspace.unfollow_in_pane(&pane, window, cx);
@@ -8520,6 +8526,10 @@ impl Workspace {
 
     pub fn has_active_modal(&self, _: &mut Window, cx: &mut App) -> bool {
         self.modal_layer.read(cx).has_active_modal()
+    }
+
+    pub fn has_active_bottom_popup(&self, cx: &App) -> bool {
+        !self.notifications.is_empty() || self.toast_layer.read(cx).has_active_toast()
     }
 
     pub fn active_modal<V: ManagedView + 'static>(&self, cx: &App) -> Option<Entity<V>> {

@@ -37,6 +37,94 @@ fn main() {
 
         // weak link to support Catalina
         println!("cargo:rustc-link-arg=-Wl,-weak_framework,ScreenCaptureKit");
+
+        if let Ok(out_dir) = std::env::var("OUT_DIR") {
+            let out_dir: &std::path::Path = out_dir.as_ref();
+            if let Some(target_dir) = std::path::Path::new(&out_dir)
+                .parent()
+                .and_then(|p| p.parent())
+                .and_then(|p| p.parent())
+            {
+                let app_bundle = target_dir.join("IDE.app");
+                let macos_dir = app_bundle.join("Contents/MacOS");
+                let resources_dir = app_bundle.join("Contents/Resources");
+                let info_plist = app_bundle.join("Contents/Info.plist");
+
+                let _ = std::fs::create_dir_all(&macos_dir);
+                let _ = std::fs::create_dir_all(&resources_dir);
+
+                let plist_content = r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.notapublicfigureanymore.ide</string>
+    <key>CFBundleName</key>
+    <string>IDE</string>
+    <key>CFBundleDisplayName</key>
+    <string>IDE</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>ide</string>
+    <key>CFBundleIconFile</key>
+    <string>app_icon</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+"#;
+                let _ = std::fs::write(&info_plist, plist_content);
+
+                let custom_icon = std::path::Path::new("../../partial/assets/app_icon.icns");
+                let src_icon = if custom_icon.exists() {
+                    custom_icon
+                } else {
+                    std::path::Path::new("resources/app_icon.icns")
+                };
+                if src_icon.exists() {
+                    let _ = std::fs::copy(src_icon, resources_dir.join("app_icon.icns"));
+                    let _ = std::fs::copy(src_icon, resources_dir.join("app-icon.icns"));
+                }
+                let src_doc = std::path::Path::new("resources/Document.icns");
+                if src_doc.exists() {
+                    let _ = std::fs::copy(src_doc, resources_dir.join("Document.icns"));
+                }
+                let custom_dark = std::path::Path::new("../../partial/assets/app_icon_dark.png");
+                let src_dark = if custom_dark.exists() {
+                    custom_dark
+                } else {
+                    std::path::Path::new("resources/app-icon-dark.png")
+                };
+                if src_dark.exists() {
+                    let _ = std::fs::copy(src_dark, resources_dir.join("app-icon-dark.png"));
+                }
+                let custom_light = std::path::Path::new("../../partial/assets/app_icon_light.png");
+                let src_light = if custom_light.exists() {
+                    custom_light
+                } else {
+                    std::path::Path::new("resources/app-icon-light.png")
+                };
+                if src_light.exists() {
+                    let _ = std::fs::copy(src_light, resources_dir.join("app-icon-light.png"));
+                }
+
+                let bin_path = target_dir.join("ide");
+                let bundle_exe = macos_dir.join("ide");
+                let _ = std::fs::remove_file(&bundle_exe);
+                if bin_path.exists() {
+                    let _ = std::fs::hard_link(&bin_path, &bundle_exe);
+                }
+
+                let _ = Command::new("/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister")
+                    .args(["-f", app_bundle.to_str().unwrap_or_default()])
+                    .output();
+            }
+        }
     }
 
     // Populate git sha environment variable if git is available

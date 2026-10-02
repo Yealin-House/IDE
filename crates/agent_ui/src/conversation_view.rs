@@ -3561,7 +3561,7 @@ fn native_available_skills(
 fn placeholder_text(agent_name: &str, has_commands: bool) -> String {
     if agent_name == agent::ZED_AGENT_ID.as_ref() {
         format!(
-            "Message the {}, @ to include context, / for commands",
+            "Message {}, @ to include context, / for commands",
             agent_name
         )
     } else if has_commands {

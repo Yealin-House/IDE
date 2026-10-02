@@ -165,7 +165,7 @@ impl ZedAiOnboarding {
             .w_full()
             .relative()
             .gap_1()
-            .child(Headline::new("Welcome to Zed AI"))
+            .child(Headline::new("Welcome to AI"))
             .child(
                 Label::new("Sign in to try GPT Luna. Your 14 days begin when you start the trial.")
                     .color(Color::Muted)
@@ -195,7 +195,7 @@ impl ZedAiOnboarding {
                 .relative()
                 .min_w_0()
                 .gap_1()
-                .child(Headline::new("Welcome to Zed AI"))
+                .child(Headline::new("Welcome to AI"))
                 .child(YoungAccountBanner)
                 .child(
                     v_flex()
@@ -232,7 +232,7 @@ impl ZedAiOnboarding {
                 .w_full()
                 .relative()
                 .gap_1()
-                .child(Headline::new("Welcome to Zed AI"))
+                .child(Headline::new("Welcome to AI"))
                 .child(
                     v_flex()
                         .mt_2()

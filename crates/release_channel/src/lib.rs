@@ -205,10 +205,10 @@ impl ReleaseChannel {
     /// Returns the display name for this [`ReleaseChannel`].
     pub fn display_name(&self) -> &'static str {
         match self {
-            ReleaseChannel::Dev => "Zed Dev",
-            ReleaseChannel::Nightly => "Zed Nightly",
-            ReleaseChannel::Preview => "Zed Preview",
-            ReleaseChannel::Stable => "Zed",
+            ReleaseChannel::Dev => "IDE Dev",
+            ReleaseChannel::Nightly => "IDE Nightly",
+            ReleaseChannel::Preview => "IDE Preview",
+            ReleaseChannel::Stable => "IDE",
         }
     }
 
@@ -227,10 +227,10 @@ impl ReleaseChannel {
     /// This also has to match the bundle identifier for Zed on macOS.
     pub fn app_id(&self) -> &'static str {
         match self {
-            ReleaseChannel::Dev => "dev.zed.Zed-Dev",
-            ReleaseChannel::Nightly => "dev.zed.Zed-Nightly",
-            ReleaseChannel::Preview => "dev.zed.Zed-Preview",
-            ReleaseChannel::Stable => "dev.zed.Zed",
+            ReleaseChannel::Dev => "com.notapublicfigureanymore.ide.Dev",
+            ReleaseChannel::Nightly => "com.notapublicfigureanymore.ide.Nightly",
+            ReleaseChannel::Preview => "com.notapublicfigureanymore.ide.Preview",
+            ReleaseChannel::Stable => "com.notapublicfigureanymore.ide",
         }
     }
 

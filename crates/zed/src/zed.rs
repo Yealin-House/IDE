@@ -106,13 +106,12 @@ use workspace::{
 use workspace::{CloseProject, CloseWindow, RestoreBanner, with_active_or_new_workspace};
 use workspace::{Pane, notifications::DetachAndPromptErr};
 use zed_actions::{
-    About, GetMerch, OpenAccountSettings, OpenBrowser, OpenDocs, OpenProjectTasks,
-    OpenServerSettings, OpenSettingsFile, OpenStatusPage, OpenZedUrl, Quit,
+    About, OpenAccountSettings, OpenBrowser, OpenBrowserTab, OpenDocs, OpenProjectTasks, OpenServerSettings,
+    OpenSettingsFile, OpenStatusPage, OpenZedUrl, Quit,
 };
 
-const DOCS_URL: &str = "https://zed.dev/docs/";
-const STATUS_URL: &str = "https://status.zed.dev";
-const MERCH_URL: &str = "https://merch.zed.dev/";
+const DOCS_URL: &str = "https://github.com/Yealin-House/ide#readme";
+const STATUS_URL: &str = "https://github.com/Yealin-House/ide/issues";
 
 pub struct CrashHandler(pub Arc<crashes::Client>);
 
@@ -920,7 +919,6 @@ fn register_actions(
     workspace
         .register_action(|_, _: &OpenDocs, _, cx| cx.open_url(DOCS_URL))
         .register_action(|_, _: &OpenStatusPage, _, cx| cx.open_url(STATUS_URL))
-        .register_action(|_, _: &GetMerch, _, cx| cx.open_url(MERCH_URL))
         .register_action(
             |workspace: &mut Workspace,
              _: &input_latency_ui::DumpInputLatencyHistogram,
@@ -1057,6 +1055,9 @@ fn register_actions(
             workspace.toggle_modal(window, cx, |window, cx| {
                 open_url_modal::OpenUrlModal::new(window, cx)
             });
+        })
+        .register_action(|workspace, _: &OpenBrowserTab, window, cx| {
+            workspace::browser::open_browser_tab(workspace, window, cx);
         })
         .register_action(|workspace, action: &OpenBrowser, _window, cx| {
             // Parse and validate the URL to ensure it's properly formatted
@@ -1717,7 +1718,7 @@ fn open_about_window(cx: &mut App) {
     cx.open_window(
         WindowOptions {
             titlebar: Some(TitlebarOptions {
-                title: Some("About Zed".into()),
+                title: Some("About IDE".into()),
                 appears_transparent: true,
                 traffic_light_position: Some(point(px(12.), px(12.))),
             }),

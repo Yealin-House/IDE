@@ -235,6 +235,7 @@ impl QueryHistory {
                 .list_recent_queries()
                 .unwrap_or_default()
                 .into_iter()
+                .filter(|q| !q.trim().starts_with("zed"))
                 .collect()
         })
     }
@@ -399,8 +400,13 @@ impl CommandPaletteDelegate {
             commands
                 .into_iter()
                 .map(|command| {
+                    let name = if let Some(rest) = command.command_name.strip_prefix("zed: ") {
+                        format!("ide: {rest}")
+                    } else {
+                        command.command_name.replace("zed ", "ide ")
+                    };
                     (
-                        SharedString::from(command.command_name),
+                        SharedString::from(name),
                         CommandUsage {
                             last_invoked: command.last_invoked.unix_timestamp(),
                             invocations: command.invocations,
@@ -927,6 +933,14 @@ pub fn humanize_action_name(name: &str) -> String {
             index += 1;
         }
     }
+
+    if let Some(rest) = result.strip_prefix("zed: ") {
+        result = format!("ide: {rest}");
+    }
+    result = result
+        .replace("zed ", "ide ")
+        .replace(" zed", " ide")
+        .replace(":zed", ":ide");
 
     result
 }

@@ -297,6 +297,7 @@ pub trait Platform: 'static {
     }
 
     fn set_dock_menu(&self, menu: Vec<MenuItem>, keymap: &Keymap);
+    fn set_app_icon(&self, _image_bytes: &[u8]) {}
     fn perform_dock_menu_action(&self, _action: usize) {}
     fn add_recent_document(&self, _path: &Path) {}
     fn update_jump_list(

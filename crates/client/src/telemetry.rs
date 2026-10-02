@@ -699,12 +699,9 @@ impl Telemetry {
             )
         };
 
-        let request = self.build_request(json_bytes, &request_body)?;
-        let response = self.http_client.send(request).await?;
-        if response.status() != 200 {
-            log::error!("Failed to send events: HTTP {:?}", response.status());
-        }
-
+        // Debloated: Outgoing telemetry network upload disabled completely.
+        drop(json_bytes);
+        drop(request_body);
         anyhow::Ok(())
     }
 

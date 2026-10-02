@@ -118,26 +118,17 @@ impl ApiKeysWithoutProviders {
 impl RenderOnce for ApiKeysWithoutProviders {
     fn render(self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         v_flex()
-            .mt_2()
-            .gap_1()
+            .gap_2()
+            .child(Headline::new("Welcome to IDE AI"))
             .child(
-                h_flex()
-                    .gap_2()
-                    .child(
-                        Label::new("API Keys")
-                            .size(LabelSize::Small)
-                            .color(Color::Muted)
-                            .buffer_font(cx),
-                    )
-                    .child(Divider::horizontal()),
+                Label::new("Bring your own API keys (Anthropic, OpenAI, Ollama, DeepSeek, Google, etc.) to start using the assistant.")
+                    .color(Color::Muted)
+                    .mb_2(),
             )
-            .child(List::new().child(ListBulletItem::new(
-                "Add your own keys to use AI without signing in.",
-            )))
             .child(
-                Button::new("configure-providers", "Configure Providers")
+                Button::new("configure-providers", "Configure AI Providers")
                     .full_width()
-                    .style(ButtonStyle::Outlined)
+                    .style(ButtonStyle::Tinted(ui::TintColor::Accent))
                     .on_click(move |_, window, cx| {
                         window.dispatch_action(zed_actions::agent::OpenSettings.boxed_clone(), cx);
                     }),

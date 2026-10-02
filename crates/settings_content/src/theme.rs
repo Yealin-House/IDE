@@ -214,7 +214,7 @@ pub struct ThemeSettingsContent {
     /// The font size for user messages in the agent panel.
     pub agent_buffer_font_size: Option<FontSize>,
     pub git_commit_buffer_font_size: Option<FontSize>,
-    /// The name of the Zed theme to use.
+    /// The name of the theme to use.
     pub theme: Option<ThemeSelection>,
     /// The name of the icon theme to use.
     pub icon_theme: Option<IconThemeSelection>,

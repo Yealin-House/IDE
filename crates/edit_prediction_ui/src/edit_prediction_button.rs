@@ -1,6 +1,5 @@
 use anyhow::Result;
-use client::{Client, UserStore, zed_urls};
-use cloud_llm_client::UsageLimit;
+use client::UserStore;
 use codestral::{self, CodestralEditPredictionDelegate};
 use copilot::Status;
 use edit_prediction::EditPredictionStore;
@@ -30,7 +29,7 @@ use settings::{
 use std::{ops::Range, rc::Rc, sync::Arc, time::Duration};
 use ui::{
     Clickable, ContextMenu, ContextMenuEntry, DocumentationSide, IconButton, IconButtonShape,
-    Indicator, PopoverMenu, PopoverMenuHandle, ProgressBar, Tooltip, prelude::*,
+    Indicator, PopoverMenu, PopoverMenuHandle, Tooltip, prelude::*,
 };
 use util::ResultExt as _;
 
@@ -427,7 +426,7 @@ impl Render for EditPredictionButton {
                 }
 
                 let show_editor_predictions = self.editor_show_predictions;
-                let user = self.user_store.read(cx).current_user();
+                let _user = self.user_store.read(cx).current_user();
 
                 let mercury_has_error = matches!(provider, EditPredictionProvider::Mercury)
                     && edit_prediction::EditPredictionStore::try_global(cx).is_some_and(
@@ -446,8 +445,7 @@ impl Render for EditPredictionButton {
                     None
                 };
 
-                let zed_cloud_needs_sign_in =
-                    matches!(provider, EditPredictionProvider::Zed) && user.is_none();
+                let zed_cloud_needs_sign_in = false;
                 let provider_unavailable =
                     missing_token || mercury_has_error || zed_cloud_needs_sign_in;
 
@@ -949,7 +947,7 @@ impl EditPredictionButton {
                 .icon_color(Color::Muted)
                 .documentation_aside(DocumentationSide::Left, |_| {
                     Label::new(indoc!{"
-                        Open your settings to add sensitive paths for which Zed will never predict edits."}).into_any_element()
+                        Open your settings to add sensitive paths for which IDE will never predict edits."}).into_any_element()
                 })
                 .handler(move |window, cx| {
                     telemetry::event!(
@@ -1109,239 +1107,9 @@ impl EditPredictionButton {
         cx: &mut Context<Self>,
     ) -> Entity<ContextMenu> {
         ContextMenu::build(window, cx, |mut menu, window, cx| {
-            let user = self.user_store.read(cx).current_user();
-
-            let needs_sign_in = user.is_none()
-                && matches!(
-                    provider,
-                    EditPredictionProvider::None | EditPredictionProvider::Zed
-                );
-
-            if needs_sign_in {
-                menu = menu
-                    .custom_row(move |_window, cx| {
-                        let description = indoc! {
-                            "You get 2,000 accepted suggestions at every keystroke for free, \
-                            powered by Zeta, our open-source, open-data model"
-                        };
-
-                        v_flex()
-                            .max_w_64()
-                            .h(rems_from_px(148_f32))
-                            .child(render_zeta_tab_animation(cx))
-                            .child(Label::new("Edit Prediction"))
-                            .child(
-                                Label::new(description)
-                                    .color(Color::Muted)
-                                    .size(LabelSize::Small),
-                            )
-                            .into_any_element()
-                    })
-                    .separator()
-                    .entry("Sign In & Start Using", None, |window, cx| {
-                        telemetry::event!(
-                            "Edit Prediction Menu Action",
-                            action = "sign_in",
-                            provider = "zed",
-                        );
-                        let client = Client::global(cx);
-                        window
-                            .spawn(cx, async move |cx| {
-                                client
-                                    .sign_in_with_optional_connect(true, &cx)
-                                    .await
-                                    .log_err();
-                            })
-                            .detach();
-                    })
-                    .link_with_handler(
-                        "Learn More",
-                        OpenBrowser {
-                            url: zed_urls::edit_prediction_docs(cx).into(),
-                        }
-                        .boxed_clone(),
-                        |_window, _cx| {
-                            telemetry::event!(
-                                "Edit Prediction Menu Action",
-                                action = "view_docs",
-                                source = "upsell",
-                            );
-                        },
-                    )
-                    .separator();
-            } else {
-                let mercury_payment_required = matches!(provider, EditPredictionProvider::Mercury)
-                    && edit_prediction::EditPredictionStore::try_global(cx).is_some_and(
-                        |ep_store| ep_store.read(cx).mercury_has_payment_required_error(),
-                    );
-
-                if mercury_payment_required {
-                    menu = menu
-                        .header("Mercury")
-                        .item(ContextMenuEntry::new("Free tier limit reached").disabled(true))
-                        .item(
-                            ContextMenuEntry::new(
-                                "Upgrade to a paid plan to continue using the service",
-                            )
-                            .disabled(true),
-                        )
-                        .separator();
-                }
-
-                if let Some(usage) = self
-                    .edit_prediction_provider
-                    .as_ref()
-                    .and_then(|provider| provider.usage(cx))
-                {
-                    menu = menu.header("Usage");
-                    menu = menu
-                        .custom_entry(
-                            move |_window, cx| {
-                                let used_percentage = match usage.limit {
-                                    UsageLimit::Limited(limit) => {
-                                        Some((usage.amount as f32 / limit as f32) * 100.)
-                                    }
-                                    UsageLimit::Unlimited => None,
-                                };
-
-                                h_flex()
-                                    .flex_1()
-                                    .gap_1p5()
-                                    .children(used_percentage.map(|percent| {
-                                        ProgressBar::new("usage", percent, 100., cx)
-                                    }))
-                                    .child(
-                                        Label::new(match usage.limit {
-                                            UsageLimit::Limited(limit) => {
-                                                format!("{} / {limit}", usage.amount)
-                                            }
-                                            UsageLimit::Unlimited => {
-                                                format!("{} / ∞", usage.amount)
-                                            }
-                                        })
-                                        .size(LabelSize::Small)
-                                        .color(Color::Muted),
-                                    )
-                                    .into_any_element()
-                            },
-                            move |_, cx| cx.open_url(&zed_urls::account_url(cx)),
-                        )
-                        .when(usage.over_limit(), |menu| -> ContextMenu {
-                            menu.entry("Subscribe to increase your limit", None, |_window, cx| {
-                                telemetry::event!(
-                                    "Edit Prediction Menu Action",
-                                    action = "upsell_clicked",
-                                    reason = "usage_limit",
-                                );
-                                cx.open_url(&zed_urls::account_url(cx))
-                            })
-                        })
-                        .separator();
-                } else if self.user_store.read(cx).account_too_young() {
-                    menu = menu
-                        .custom_entry(
-                            |_window, _cx| {
-                                Label::new("Your GitHub account is less than 30 days old.")
-                                    .size(LabelSize::Small)
-                                    .color(Color::Warning)
-                                    .into_any_element()
-                            },
-                            |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
-                        )
-                        .entry("Upgrade to Zed Pro or contact us.", None, |_window, cx| {
-                            telemetry::event!(
-                                "Edit Prediction Menu Action",
-                                action = "upsell_clicked",
-                                reason = "account_age",
-                            );
-                            cx.open_url(&zed_urls::account_url(cx))
-                        })
-                        .separator();
-                } else if self.user_store.read(cx).has_overdue_invoices() {
-                    menu = menu
-                        .custom_entry(
-                            |_window, _cx| {
-                                Label::new("You have an outstanding invoice")
-                                    .size(LabelSize::Small)
-                                    .color(Color::Warning)
-                                    .into_any_element()
-                            },
-                            |_window, cx| {
-                                cx.open_url(&zed_urls::account_url(cx))
-                            },
-                        )
-                        .entry(
-                            "Check your payment status or contact us at billing-support@zed.dev to continue using this feature.",
-                            None,
-                            |_window, cx| {
-                                cx.open_url(&zed_urls::account_url(cx))
-                            },
-                        )
-                        .separator();
-                }
-            }
-
-            if !needs_sign_in {
-                menu = self.build_language_settings_menu(menu, window, cx);
-            }
+            menu = self.build_language_settings_menu(menu, window, cx);
             menu = self.add_provider_switching_section(menu, provider, cx);
-
-            if cx.is_staff() {
-                if let Some(store) = EditPredictionStore::try_global(cx) {
-                    store.update(cx, |store, cx| {
-                        store.refresh_available_experiments(cx);
-                    });
-                    let store = store.read(cx);
-                    let experiments = store.available_experiments().to_vec();
-                    let preferred = store.preferred_experiment().map(|s| s.to_owned());
-                    let active = store.active_experiment().map(|s| s.to_owned());
-
-                    let preferred_for_submenu = preferred.clone();
-                    menu = menu
-                        .separator()
-                        .submenu("Experiment", move |menu, _window, _cx| {
-                            let mut menu = menu.toggleable_entry(
-                                "Default",
-                                preferred_for_submenu.is_none(),
-                                IconPosition::Start,
-                                None,
-                                {
-                                    move |_window, cx| {
-                                        if let Some(store) = EditPredictionStore::try_global(cx) {
-                                            store.update(cx, |store, _cx| {
-                                                store.set_preferred_experiment(None);
-                                            });
-                                        }
-                                    }
-                                },
-                            );
-                            for experiment in &experiments {
-                                let is_selected = active.as_deref() == Some(experiment.as_str())
-                                    || preferred.as_deref() == Some(experiment.as_str());
-                                let experiment_name = experiment.clone();
-                                menu = menu.toggleable_entry(
-                                    experiment.clone(),
-                                    is_selected,
-                                    IconPosition::Start,
-                                    None,
-                                    move |_window, cx| {
-                                        if let Some(store) = EditPredictionStore::try_global(cx) {
-                                            store.update(cx, |store, _cx| {
-                                                store.set_preferred_experiment(Some(
-                                                    experiment_name.clone(),
-                                                ));
-                                            });
-                                        }
-                                    },
-                                );
-                            }
-                            menu
-                        });
-                }
-            }
-
-            let menu = self.add_configure_providers_item(menu);
-            menu
+            self.add_configure_providers_item(menu)
         })
     }
 
@@ -1485,46 +1253,8 @@ pub fn set_completion_provider(fs: Arc<dyn Fs>, cx: &mut App, provider: EditPred
     });
 }
 
-pub fn get_available_providers(cx: &mut App) -> Vec<EditPredictionProvider> {
-    let mut providers = Vec::new();
-
-    providers.push(EditPredictionProvider::Zed);
-
-    let app_state = workspace::AppState::global(cx);
-    if copilot::GlobalCopilotAuth::try_get_or_init(app_state, cx)
-        .is_some_and(|copilot| copilot.0.read(cx).is_authenticated())
-    {
-        providers.push(EditPredictionProvider::Copilot);
-    };
-
-    if codestral::codestral_api_key(cx).is_some() {
-        providers.push(EditPredictionProvider::Codestral);
-    }
-
-    if all_language_settings(None, cx)
-        .edit_predictions
-        .ollama
-        .is_some()
-    {
-        providers.push(EditPredictionProvider::Ollama);
-    }
-
-    if all_language_settings(None, cx)
-        .edit_predictions
-        .open_ai_compatible_api
-        .is_some()
-    {
-        providers.push(EditPredictionProvider::OpenAiCompatibleApi);
-    }
-
-    if edit_prediction::mercury::mercury_api_token(cx)
-        .read(cx)
-        .has_key()
-    {
-        providers.push(EditPredictionProvider::Mercury);
-    }
-
-    providers
+pub fn get_available_providers(_cx: &mut App) -> Vec<EditPredictionProvider> {
+    vec![EditPredictionProvider::Ollama]
 }
 
 fn toggle_show_edit_predictions_for_language(

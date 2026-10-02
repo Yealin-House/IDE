@@ -1,4 +1,26 @@
 use std::{cell::RefCell, rc::Rc};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static ACTIVE_POPOVER_MENU_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+pub fn has_active_popover_menu() -> bool {
+    ACTIVE_POPOVER_MENU_COUNT.load(Ordering::Relaxed) > 0
+}
+
+pub struct ActivePopoverMenuGuard(());
+
+impl ActivePopoverMenuGuard {
+    pub fn new() -> Self {
+        ACTIVE_POPOVER_MENU_COUNT.fetch_add(1, Ordering::SeqCst);
+        Self(())
+    }
+}
+
+impl Drop for ActivePopoverMenuGuard {
+    fn drop(&mut self) {
+        ACTIVE_POPOVER_MENU_COUNT.fetch_sub(1, Ordering::SeqCst);
+    }
+}
 
 use gpui::{
     Anchor, AnyElement, AnyView, App, Bounds, DismissEvent, DispatchPhase, Element, ElementId,
@@ -283,6 +305,8 @@ fn show_menu<M: ManagedView>(
         return;
     };
     let menu2 = menu.clone();
+    let guard = Rc::new(RefCell::new(Some(ActivePopoverMenuGuard::new())));
+    let guard_dismiss = guard.clone();
 
     window
         .subscribe(&new_menu, cx, move |modal, _: &DismissEvent, window, cx| {
@@ -292,6 +316,7 @@ fn show_menu<M: ManagedView>(
                 window.focus(previous_focus_handle, cx);
             }
             *menu2.borrow_mut() = None;
+            *guard_dismiss.borrow_mut() = None;
             window.refresh();
         })
         .detach();

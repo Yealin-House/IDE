@@ -4,6 +4,8 @@
 mod reliability;
 mod watcher_debug;
 mod zed;
+#[cfg(target_os = "macos")]
+mod macos_bundle;
 
 // Ensure the binary name stays in sync with APP_NAME so that the paths used
 // at runtime (data dir, config dir, etc.) match what the binary is called.
@@ -211,6 +213,11 @@ fn main() {
     util::prevent_root_execution();
 
     let args = Args::parse();
+
+    #[cfg(target_os = "macos")]
+    if args.askpass.is_none() && args.crash_handler.is_none() {
+        macos_bundle::ensure_macos_app_bundle();
+    }
 
     // `zed --askpass` Makes zed operate in nc/netcat mode for use with askpass
     #[cfg(not(target_os = "windows"))]

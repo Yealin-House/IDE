@@ -1,48 +1,105 @@
-# Zed
+# IDE
 
-[![Zed](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/zed-industries/zed/main/assets/badge/v0.json)](https://zed.dev)
-[![CI](https://github.com/zed-industries/zed/actions/workflows/run_tests.yml/badge.svg)](https://github.com/zed-industries/zed/actions/workflows/run_tests.yml)
+High-performance, debloated code editor with Bring-Your-Own-Key (BYOK) AI and integrated browser preview.
 
-Welcome to Zed, a high-performance, multiplayer code editor from the creators of [Atom](https://github.com/atom/atom) and [Tree-sitter](https://github.com/tree-sitter/tree-sitter).
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE-GPL)
+[![Rust](https://img.shields.io/badge/Language-Rust-orange.svg)](https://www.rust-lang.org/)
+
+IDE is an open-source code editor engineered for developers who prioritize performance, privacy, and full local control. It provides GPU-accelerated editing, completely eliminates telemetry and cloud sign-in requirements, and enables direct connections to local and remote AI models using your own API credentials.
 
 ---
 
-### Installation
+## Features
 
-On macOS, Linux, and Windows you can [download Zed directly](https://zed.dev/download) or install Zed via your local package manager ([macOS](https://zed.dev/docs/installation#macos)/[Linux](https://zed.dev/docs/linux#installing-via-a-package-manager)/[Windows](https://zed.dev/docs/windows#package-managers)).
+- Blazing GPU-Accelerated Performance: Built on GPUI and Rust for sub-millisecond input latency and high-refresh-rate rendering.
+- Privacy-First and Zero Telemetry: All analytics, usage tracking, and remote telemetry pings are disabled.
+- Account-Free Operation: All editor functionality is unlocked locally without mandatory logins, cloud accounts, or walled-garden requirements.
+- Bring Your Own Key (BYOK) AI: Connect directly to your choice of language model providers using your own API keys:
+  - Anthropic (Claude 3.5 Sonnet, Claude 3 Opus)
+  - OpenAI (GPT-4o, o1, etc.)
+  - Google AI (Gemini 1.5 Pro, Flash)
+  - Local LLMs via Ollama and LM Studio
+  - OpenRouter, DeepSeek, Mistral, and AWS Bedrock
+- Integrated Browser Tab: Inspect local development servers (such as `http://localhost:3000` or `http://localhost:5173`) directly inside the editor pane. Open it with `alt-b`, `cmd-alt-b`, or `cmd-k b`, or via File → New Browser Tab.
+- Clean Local Configuration: Application settings and caches are isolated to `~/.ide/` (macOS) or `~/.config/ide/` (Linux).
 
-Other platforms are not yet available:
+---
 
-- Web ([tracking discussion](https://github.com/zed-industries/zed/discussions/26195))
+## Configuration
 
-### Developing Zed
+Configuration is stored in `~/.ide/settings.json` (macOS) or `~/.config/ide/settings.json` (Linux).
 
-- [Building Zed for macOS](./docs/src/development/macos.md)
-- [Building Zed for Linux](./docs/src/development/linux.md)
-- [Building Zed for Windows](./docs/src/development/windows.md)
+### AI Model Providers
 
-### Contributing
+Configure model endpoints and authentication directly in `settings.json` or through standard environment variables:
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways you can contribute to Zed.
+```json
+{
+  "language_models": {
+    "anthropic": {
+      "api_url": "https://api.anthropic.com"
+    },
+    "openai": {
+      "api_url": "https://api.openai.com/v1"
+    },
+    "ollama": {
+      "api_url": "http://localhost:11434"
+    }
+  },
+  "edit_predictions": {
+    "provider": "ollama"
+  }
+}
+```
 
-Also... we're hiring! Check out our [jobs](https://zed.dev/jobs) page for open roles.
+Alternatively, set your API keys via environment variables:
 
-### Licensing
+```bash
+export ANTHROPIC_API_KEY="your-anthropic-key"
+export OPENAI_API_KEY="your-openai-key"
+export GOOGLE_AI_API_KEY="your-gemini-key"
+```
 
-Zed source code is licensed primarily under GPL-3.0-or-later, with Apache-2.0 components where marked.
+---
 
-License information for third party dependencies must be correctly provided for CI to pass.
+## Building from Source
 
-We use [`cargo-about`](https://github.com/EmbarkStudios/cargo-about) to automatically comply with open source licenses. If CI is failing, check the following:
+### Prerequisites
 
-- Is it showing a `no license specified` error for a crate you've created? If so, add `publish = false` under `[package]` in your crate's Cargo.toml.
-- Is the error `failed to satisfy license requirements` for a dependency? If so, first determine what license the project has and whether this system is sufficient to comply with this license's requirements. If you're unsure, ask a lawyer. Once you've verified that this system is acceptable add the license's SPDX identifier to the `accepted` array in `script/licenses/zed-licenses.toml`.
-- Is `cargo-about` unable to find the license for a dependency? If so, add a clarification field at the end of `script/licenses/zed-licenses.toml`, as specified in the [cargo-about book](https://embarkstudios.github.io/cargo-about/cli/generate/config.html#crate-configuration).
+- Rust toolchain (stable, edition 2024 compatible)
+- macOS: Xcode Command Line Tools
+- Linux: standard development packages (`pkg-config`, `libfontconfig1-dev`, `libasound2-dev`, etc.)
 
-## Sponsorship
+### Compilation
 
-Zed is developed by **Zed Industries, Inc.**, a for-profit company.
+```bash
+# Clone the repository
+git clone https://github.com/Yealin-House/ide.git
+cd ide
 
-If you’d like to financially support the project, you can do so via GitHub Sponsors.
-Sponsorships go directly to Zed Industries and are used as general company revenue.
-There are no perks or entitlements associated with sponsorship.
+# Build release binary
+cargo build --release --bin ide
+
+# Run IDE
+./target/release/ide
+```
+
+---
+
+## Legal and Licensing
+
+### License
+
+IDE is free and open-source software licensed under the **GNU General Public License version 3 or later** ([GPL-3.0-or-later](LICENSE-GPL)). Specific supporting crates and libraries are licensed under the **Apache License, Version 2.0** ([LICENSE-APACHE](LICENSE-APACHE)).
+
+### The `partial/` Component
+
+The integrated browser tab and the application branding assets live in the [`partial/`](partial/) git submodule ([source repository](https://github.com/Jaseunda/ide)). This component is written for IDE, is **Copyright © 2026 Jaseunda**, and is licensed under the same **GPL-3.0-or-later** — see [`partial/LICENSE`](partial/LICENSE). It is compiled into and distributed with the editor binary.
+
+### Upstream Attribution
+
+This software is derived from the Zed open-source project, originally created and published by Zed Industries, Inc. We acknowledge and appreciate the contributions of the original authors and the open-source community.
+
+### Trademark Notice
+
+Zed is a trademark of Zed Industries, Inc. This project is an independent fork and is not endorsed by, sponsored by, or affiliated with Zed Industries, Inc.

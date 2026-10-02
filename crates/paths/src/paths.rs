@@ -15,7 +15,7 @@ pub const EDITORCONFIG_NAME: &str = ".editorconfig";
 /// and state directory paths.
 ///
 /// Forks should change this to avoid colliding with Zed's user data.
-pub const APP_NAME: &str = "Zed";
+pub const APP_NAME: &str = "IDE";
 
 /// Lowercased form of [`APP_NAME`], for use in XDG-style paths on
 /// Linux/FreeBSD and the macOS `~/.config` fallback.
@@ -123,19 +123,8 @@ pub fn config_dir() -> &'static PathBuf {
     CONFIG_DIR.get_or_init(|| {
         if let Some(custom_dir) = CUSTOM_DATA_DIR.get() {
             custom_dir.join("config")
-        } else if cfg!(target_os = "windows") {
-            dirs::config_dir()
-                .expect("failed to determine RoamingAppData directory")
-                .join(APP_NAME)
-        } else if cfg!(any(target_os = "linux", target_os = "freebsd")) {
-            if let Ok(flatpak_xdg_config) = std::env::var("FLATPAK_XDG_CONFIG_HOME") {
-                flatpak_xdg_config.into()
-            } else {
-                dirs::config_dir().expect("failed to determine XDG_CONFIG_HOME directory")
-            }
-            .join(APP_NAME_LOWERCASE)
         } else {
-            home_dir().join(".config").join(APP_NAME_LOWERCASE)
+            home_dir().join(".ide")
         }
     })
 }
@@ -634,4 +623,5 @@ pub fn global_gitignore_path() -> Option<PathBuf> {
     GLOBAL_GITIGNORE_PATH
         .get_or_init(::ignore::gitignore::gitconfig_excludes_path)
         .clone()
+
 }

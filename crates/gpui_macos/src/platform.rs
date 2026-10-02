@@ -1090,6 +1090,19 @@ impl Platform for MacPlatform {
         self.0.lock().menus.clone()
     }
 
+    fn set_app_icon(&self, image_bytes: &[u8]) {
+        unsafe {
+            let data: id = msg_send![class!(NSData), dataWithBytes:image_bytes.as_ptr() length:image_bytes.len()];
+            let image: id = msg_send![class!(NSImage), alloc];
+            let image: id = msg_send![image, initWithData:data];
+            if !image.is_null() {
+                let app: id = msg_send![APP_CLASS, sharedApplication];
+                let _: () = msg_send![app, setApplicationIconImage:image];
+                let _: () = msg_send![image, release];
+            }
+        }
+    }
+
     fn set_dock_menu(&self, menu: Vec<MenuItem>, keymap: &Keymap) {
         unsafe {
             let app: id = msg_send![APP_CLASS, sharedApplication];

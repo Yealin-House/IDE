@@ -2622,6 +2622,11 @@ impl App {
         self.platform.set_dock_menu(menus, &self.keymap.borrow())
     }
 
+    /// Sets the dynamic application icon (e.g. for light / dark theme adaptation)
+    pub fn set_app_icon(&self, image_bytes: &[u8]) {
+        self.platform.set_app_icon(image_bytes);
+    }
+
     /// Performs the action associated with the given dock menu item, only used on Windows for now.
     pub fn perform_dock_menu_action(&self, action: usize) {
         self.platform.perform_dock_menu_action(action);

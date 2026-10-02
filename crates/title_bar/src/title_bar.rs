@@ -1271,9 +1271,10 @@ impl TitleBar {
                 )
         } else {
             ButtonLike::new("user-menu")
-                .aria_label("User menu")
+                .aria_label("Menu")
+                .tooltip(Tooltip::text("Menu"))
                 .tab_index(0isize)
-                .child(Icon::new(IconName::ChevronDown).size(IconSize::Small))
+                .child(Icon::new(IconName::Ellipsis).size(IconSize::Small))
         };
 
         PopoverMenu::new("user-menu")
@@ -1317,7 +1318,7 @@ impl TitleBar {
                                     .w_full()
                                     .gap_1()
                                     .justify_between()
-                                    .child(Label::new("Restart to update Zed").color(Color::Accent))
+                                    .child(Label::new("Restart to update IDE").color(Color::Accent))
                                     .child(
                                         Icon::new(IconName::Download)
                                             .size(IconSize::Small)
@@ -1398,6 +1399,10 @@ impl TitleBar {
                     .action(
                         "Extensions",
                         zed_actions::Extensions::default().boxed_clone(),
+                    )
+                    .action(
+                        "New Browser Tab",
+                        Box::new(zed_actions::OpenBrowserTab),
                     )
                     .when(ai_enabled, |menu| {
                         menu.separator()

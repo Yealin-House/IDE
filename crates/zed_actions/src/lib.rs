@@ -65,7 +65,9 @@ actions!(
         OpenServerSettings,
         /// Quits the application.
         Quit,
-        /// Shows information about Zed.
+        /// Opens an embedded browser tab.
+        OpenBrowserTab,
+        /// Shows information about IDE.
         About,
         /// Opens the documentation website.
         OpenDocs,
@@ -73,8 +75,6 @@ actions!(
         OpenLicenses,
         /// Opens the Zed status page.
         OpenStatusPage,
-        /// Opens the Zed merch store.
-        GetMerch,
         /// Opens the telemetry log.
         OpenTelemetryLog,
         /// Opens the performance profiler.

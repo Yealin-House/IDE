@@ -2739,7 +2739,7 @@ fn model_id_to_selection(model_id: &AgentModelId, cx: &App) -> LanguageModelSele
     agent_settings::language_model_to_selection(&resolved, current_user_selection.as_ref())
 }
 
-pub static ZED_AGENT_ID: LazyLock<AgentId> = LazyLock::new(|| AgentId::new("Zed Agent"));
+pub static ZED_AGENT_ID: LazyLock<AgentId> = LazyLock::new(|| AgentId::new("IDE Agent"));
 
 pub fn available_native_agent(cx: &App) -> AvailableAgent {
     let registry = LanguageModelRegistry::read_global(cx);

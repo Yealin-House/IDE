@@ -1,4 +1,29 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    sync::atomic::{AtomicUsize, Ordering},
+};
+
+static ACTIVE_RIGHT_CLICK_MENU_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+pub fn has_active_right_click_menu() -> bool {
+    ACTIVE_RIGHT_CLICK_MENU_COUNT.load(Ordering::Relaxed) > 0
+}
+
+pub struct ActiveRightClickMenuGuard(());
+
+impl ActiveRightClickMenuGuard {
+    fn new() -> Self {
+        ACTIVE_RIGHT_CLICK_MENU_COUNT.fetch_add(1, Ordering::SeqCst);
+        Self(())
+    }
+}
+
+impl Drop for ActiveRightClickMenuGuard {
+    fn drop(&mut self) {
+        ACTIVE_RIGHT_CLICK_MENU_COUNT.fetch_sub(1, Ordering::SeqCst);
+    }
+}
 
 use gpui::{
     Anchor, AnyElement, App, Bounds, DismissEvent, DispatchPhase, Element, ElementId, Entity,
@@ -85,6 +110,7 @@ pub fn right_click_menu<M: ManagedView>(id: impl Into<ElementId>) -> RightClickM
 pub struct MenuHandleElementState<M> {
     menu: Rc<RefCell<Option<Entity<M>>>>,
     position: Rc<RefCell<Point<Pixels>>>,
+    guard: Rc<RefCell<Option<ActiveRightClickMenuGuard>>>,
 }
 
 impl<M> Clone for MenuHandleElementState<M> {
@@ -92,6 +118,7 @@ impl<M> Clone for MenuHandleElementState<M> {
         Self {
             menu: Rc::clone(&self.menu),
             position: Rc::clone(&self.position),
+            guard: Rc::clone(&self.guard),
         }
     }
 }
@@ -101,6 +128,7 @@ impl<M> Default for MenuHandleElementState<M> {
         Self {
             menu: Rc::default(),
             position: Rc::default(),
+            guard: Rc::default(),
         }
     }
 }
@@ -239,6 +267,7 @@ impl<M: ManagedView> Element for RightClickMenu<M> {
 
                 let attach = this.attach;
                 let menu = element_state.menu.clone();
+                let guard = element_state.guard.clone();
                 let position = element_state.position.clone();
                 let child_bounds = prepaint_state.child_bounds;
 
@@ -255,6 +284,7 @@ impl<M: ManagedView> Element for RightClickMenu<M> {
                             return;
                         };
                         let menu2 = menu.clone();
+                        let guard2 = guard.clone();
                         let previous_focus_handle = window.focused(cx);
 
                         window
@@ -266,6 +296,7 @@ impl<M: ManagedView> Element for RightClickMenu<M> {
                                     window.focus(previous_focus_handle, cx);
                                 }
                                 *menu2.borrow_mut() = None;
+                                *guard2.borrow_mut() = None;
                                 window.refresh();
                             })
                             .detach();
@@ -282,6 +313,7 @@ impl<M: ManagedView> Element for RightClickMenu<M> {
                                 window.focus(&focus_handle, cx);
                             });
                         });
+                        *guard.borrow_mut() = Some(ActiveRightClickMenuGuard::new());
                         *menu.borrow_mut() = Some(new_menu);
                         *position.borrow_mut() = if let Some(child_bounds) = child_bounds {
                             if let Some(attach) = attach {
