@@ -1,0 +1,30 @@
+APP_NAME := IDE
+BUMP := bash partial/scripts/bump-version.sh
+DMG := dist/$(APP_NAME)-$${IDE_VERSION}-macOS-$$(uname -m).dmg
+
+.PHONY: build release clean
+
+# Builds the release app. The version is bumped per build (patch) and per
+# change (minor) and embedded into the app bundle's Info.plist.
+build:
+	@IDE_VERSION=$$($(BUMP) build); export IDE_VERSION; \
+	cargo build --release --bin ide && \
+	echo "Built target/release/IDE.app ($$IDE_VERSION)"
+
+# Full release: bumps the version, persists it to VERSION, builds, then
+# produces the release artifacts in dist/ — a .dmg, its .sha256 file, and an
+# updated CHANGELOG.md. Upload the .dmg and .sha256 to the GitHub release at
+# https://github.com/Yealin-House/IDE, then commit VERSION and CHANGELOG.md.
+release:
+	@IDE_VERSION=$$($(BUMP) release); export IDE_VERSION; \
+	cargo build --release --bin ide && \
+	mkdir -p dist && \
+	test -d target/release/IDE.app && \
+	hdiutil create -volname $(APP_NAME) -srcfolder target/release/IDE.app -ov -format UDZO "$(DMG)" && \
+	shasum -a 256 "$(DMG)" > "$(DMG).sha256" && \
+	$(BUMP) changelog "$$IDE_VERSION" && \
+	echo "Release $$IDE_VERSION ready:" && \
+	ls -la dist/
+
+clean:
+	rm -rf dist

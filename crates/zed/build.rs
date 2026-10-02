@@ -53,7 +53,21 @@ fn main() {
                 let _ = std::fs::create_dir_all(&macos_dir);
                 let _ = std::fs::create_dir_all(&resources_dir);
 
-                let plist_content = r#"<?xml version="1.0" encoding="UTF-8"?>
+                println!("cargo:rerun-if-env-changed=IDE_VERSION");
+                println!("cargo:rerun-if-changed=../../VERSION");
+                let app_version = std::env::var("IDE_VERSION")
+                    .ok()
+                    .filter(|version| !version.is_empty())
+                    .or_else(|| {
+                        std::fs::read_to_string(std::path::Path::new("../../VERSION"))
+                            .ok()
+                            .map(|version| version.trim().to_string())
+                            .filter(|version| !version.is_empty())
+                    })
+                    .unwrap_or_else(|| "0.1.0".to_string());
+
+                let plist_content = format!(
+                    r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -70,14 +84,15 @@ fn main() {
     <key>CFBundleIconFile</key>
     <string>app_icon</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.1.0</string>
+    <string>{app_version}</string>
     <key>CFBundleVersion</key>
-    <string>0.1.0</string>
+    <string>{app_version}</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
 </plist>
-"#;
+"#
+                );
                 let _ = std::fs::write(&info_plist, plist_content);
 
                 let custom_icon = std::path::Path::new("../../partial/assets/app_icon.icns");
