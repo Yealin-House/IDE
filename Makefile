@@ -25,20 +25,11 @@ release:
 	rm -rf dist/staging/* && \
 	cp -R target/release/IDE.app dist/staging/ && \
 	cp LICENSE-GPL LICENSE-APACHE dist/staging/ && \
-	cp partial/LICENSE dist/staging/LICENSE-partial && \
-	rm -f "$(DMG)" && \
-	bash partial/scripts/create-dmg \
-		--volname "$(APP_NAME)" \
-		--volicon partial/assets/app_icon.icns \
-		--background partial/assets/dmg-background.png \
-		--window-pos 200 100 --window-size 660 480 \
-		--icon-size 96 \
-		--icon "IDE.app" 170 110 \
-		--app-drop-link 490 110 \
-		--icon "LICENSE-GPL" 170 330 \
-		--icon "LICENSE-APACHE" 330 330 \
-		--icon "LICENSE-partial" 490 330 \
-		"$(DMG)" dist/staging && \
+	rm -rf dist/staging/License && mkdir -p dist/staging/License && \
+	cp LICENSE-GPL LICENSE-APACHE dist/staging/License/ && \
+	cp partial/LICENSE dist/staging/License/LICENSE-partial && \
+	ln -sf /Applications dist/staging/Applications && \
+	hdiutil create -volname $(APP_NAME) -srcfolder dist/staging -ov -format UDZO "$(DMG)" && \
 	shasum -a 256 "$(DMG)" > "$(DMG).sha256" && \
 	$(BUMP) changelog "$$IDE_VERSION" && \
 	echo "Release $$IDE_VERSION ready:" && \
