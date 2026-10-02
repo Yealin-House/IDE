@@ -19,6 +19,8 @@ build:
 release:
 	@IDE_VERSION=$$($(BUMP) release); export IDE_VERSION; \
 	cargo build --release --bin ide && \
+	mkdir -p target/release/IDE.app/Contents/MacOS && \
+	cp -f target/release/ide target/release/IDE.app/Contents/MacOS/ide && \
 	mkdir -p dist/staging && \
 	rm -rf dist/staging/* && \
 	cp -R target/release/IDE.app dist/staging/ && \
