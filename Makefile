@@ -31,11 +31,13 @@ release:
 		--volname "$(APP_NAME)" \
 		--volicon partial/assets/app_icon.icns \
 		--background partial/assets/dmg-background.png \
-		--window-pos 200 120 --window-size 660 400 \
-		--icon-size 128 \
-		--icon "IDE.app" 160 200 \
-		--app-drop-link 500 200 \
-		--hide-extension "IDE.app" \
+		--window-pos 200 100 --window-size 660 480 \
+		--icon-size 96 \
+		--icon "IDE.app" 170 110 \
+		--app-drop-link 490 110 \
+		--icon "LICENSE-GPL" 170 330 \
+		--icon "LICENSE-APACHE" 330 330 \
+		--icon "LICENSE-partial" 490 330 \
 		"$(DMG)" dist/staging && \
 	shasum -a 256 "$(DMG)" > "$(DMG).sha256" && \
 	$(BUMP) changelog "$$IDE_VERSION" && \
