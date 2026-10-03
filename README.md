@@ -5,7 +5,17 @@ High-performance, debloated code editor with Bring-Your-Own-Key (BYOK) AI and in
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE-GPL)
 [![Rust](https://img.shields.io/badge/Language-Rust-orange.svg)](https://www.rust-lang.org/)
 
-IDE is an open-source code editor engineered for developers who prioritize performance, privacy, and full local control. It provides GPU-accelerated editing, completely eliminates telemetry and cloud sign-in requirements, and enables direct connections to local and remote AI models using your own API credentials.
+IDE is an open-source code editor engineered for developers who prioritize performance, privacy, and full local control. It provides GPU-accelerated editing, completely eliminates telemetry and cloud dependencies, and offers Bring-Your-Own-Key (BYOK) AI integration.
+
+---
+
+## Getting Started
+
+### Download or Build
+
+[![Download IDE](https://img.shields.io/badge/Download-IDE-brightgreen.svg)](https://www.notapublicfigureanymore.com/ide)
+
+Alternatively, [build it yourself](#building-from-source) from the source code.
 
 ---
 
@@ -21,7 +31,7 @@ IDE is an open-source code editor engineered for developers who prioritize perfo
   - Local LLMs via Ollama and LM Studio
   - OpenRouter, DeepSeek, Mistral, and AWS Bedrock
   - Model availability depends on your provider. You can configure any model ID your provider supports.
-- Integrated Browser Tab: Inspect local development servers (such as `http://localhost:3000` or `http://localhost:5173`) directly inside the editor pane. Open it with `alt-b`, `cmd-alt-b`, or `cmd-k b`, or via File → New Browser Tab.
+- Integrated Browser Tab: Inspect local development servers (such as `http://localhost:3000` or `http://localhost:5173`) directly inside the editor pane. Open it with `alt-b`, `cmd-alt-b`, or `cmd-k b`.
 - Clean Local Configuration: Application settings and caches are isolated to `~/.ide/` (macOS) or `~/.config/ide/` (Linux).
 
 ---
@@ -94,17 +104,17 @@ cargo build --release --bin ide
 
 ### License
 
-IDE is free and open-source software licensed under the **GNU General Public License version 3 or later** ([GPL-3.0-or-later](LICENSE-GPL)). Specific supporting crates and libraries are licensed under the **Apache License, Version 2.0** ([LICENSE-APACHE](LICENSE-APACHE)).
+IDE is free and open-source software licensed under the **GNU General Public License version 3 or later** ([GPL-3.0-or-later](LICENSE-GPL)). Specific supporting crates and libraries are licensed under compatible open-source licenses.
 
 ### The `partial/` Component
 
-The integrated browser tab and the application branding assets live in the [`partial/`](partial/) git submodule ([source repository](https://github.com/Jaseunda/ide)). This component is written for IDE, is **Copyright © 2026 Jaseunda**, and is licensed under the same **GPL-3.0-or-later** — see [`partial/LICENSE`](partial/LICENSE). It is compiled into and distributed with the editor binary.
+The integrated browser tab and the application branding assets live in the [`partial/`](partial/) git submodule ([source repository](https://github.com/Jaseunda/ide)). This component is written for IDE specifically.
 
 ### Upstream Attribution
 
 This software is derived from the Zed open-source project, originally created and published by Zed Industries, Inc. We acknowledge and appreciate the contributions of the original authors and the open-source community.
 
-**Notice of modification (GPL-3.0 5a):** This distribution is a modified version of Zed, modified by Jaseunda starting 2026-10-03 (rebranding, telemetry removal, cloud sign-in removal, and the addition of an embedded browser tab). Every binary release on this repository corresponds to a tagged commit in this repo plus the `partial/` submodule source at [github.com/Jaseunda/ide](https://github.com/Jaseunda/ide) (tag archives do not include submodule contents, so the complete source for a release is this repo's tag **plus** the pinned `partial/` commit).
+**Notice of modification (GPL-3.0 5a):** This distribution is a modified version of Zed, modified by Jaseunda starting 2026-10-03 (rebranding, telemetry removal, cloud sign-in removal, and the addition of integrated browser preview and BYOK AI features).
 
 ### Trademark Notice
 
