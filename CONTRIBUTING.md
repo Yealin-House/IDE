@@ -39,6 +39,26 @@ There are few hard-and-fast rules, but we typically don't merge:
 - **Join a Community Program** like [Let's Git Together](https://github.com/zed-industries/zed/issues/41541) or [The Guild](https://zed.dev/community/guild).
 - **Build features we've explicitly invited contributions for**, listed on the [community feature board](https://github.com/orgs/zed-industries/projects/78/views/4).
 
+## Code style
+
+These are the conventions the codebase follows. Reviewers will point out deviations, so reading this first saves everyone a round trip.
+
+**Rust guidelines:**
+
+- Correctness and clarity come first; speed is secondary unless a change is specifically about performance.
+- Comments explain *why* tricky code is written the way it is — not *what* it does. No comments that narrate or summarize the code.
+- Prefer adding functionality to existing files over creating new small ones; new files only for genuinely new components. Never create `mod.rs` files (`src/foo.rs` instead), and new crates declare their library root in `Cargo.toml` via `[lib] path = "foo.rs"`.
+- No panicking in library paths: propagate errors with `?` instead of `unwrap()`, and be careful with indexing that can go out of bounds.
+- Never swallow errors with `let _ =`. Either propagate with `?`, log with `.log_err()`, or handle explicitly with `match` / `if let Err(...)`. Errors from async work must reach the UI so users get meaningful feedback.
+- Use full words for variable names (no `q` for `queue`), and scope clones tightly with shadowing in async blocks.
+- Run `./script/clippy` (not `cargo clippy`) before sending a PR.
+
+**Documentation guidelines** (for changes under `docs/`):
+
+- Write in second person ("you"), active voice, present tense. Be direct and confident; skip marketing language.
+- Sentence-case for headings and list items. One blank line between blocks, no trailing spaces.
+- Use `code` style for UI elements, file paths, commands, and key bindings — e.g. `cmd-shift-p` with a hyphen between modifier and key.
+
 ## AI Policy
 
 We welcome the use of LLMs for coding, but we hold a high bar for all contributions, and **we expect a human in the loop who genuinely understands the work an LLM produces** on their behalf.
